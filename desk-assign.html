@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desk Assignment</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0f0f13;
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      color: #e8e6e0;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #1a1a22; }
+    ::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 2px; }
+
+    /* HEADER */
+    .header {
+      background: #141418;
+      border-bottom: 1px solid #2a2a35;
+      padding: 22px 40px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .header-icon {
+      width: 40px; height: 40px;
+      background: #FFD93D;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; color: #f0ede6; }
+    .header p  { font-size: 13px; color: #555; margin-top: 2px; }
+
+    /* MAIN GRID */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 32px 40px 0;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    @media (max-width: 600px) {
+      .main { grid-template-columns: 1fr; padding: 20px 16px 0; }
+      .header { padding: 18px 16px; }
+      .action-area, .results-area { padding-left: 16px; padding-right: 16px; }
+    }
+
+    /* PANEL */
+    .panel {
+      background: #141418;
+      border: 1px solid #252530;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #252530;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .panel-title { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 1.2px; }
+    .panel-count {
+      margin-left: auto;
+      background: #252530;
+      color: #555;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      padding: 2px 9px;
+      border-radius: 20px;
+    }
+
+    /* INPUT ROW */
+    .input-row {
+      display: flex;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid #1e1e28;
+    }
+    .input-row input {
+      flex: 1;
+      background: #0f0f13;
+      border: 1px solid #2a2a38;
+      border-radius: 8px;
+      color: #e8e6e0;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-row input:focus { border-color: #FFD93D; }
+    .input-row input::placeholder { color: #3a3a4a; }
+    .add-btn {
+      background: #FFD93D;
+      color: #0f0f13;
+      border: none;
+      border-radius: 8px;
+      width: 36px; height: 36px;
+      font-size: 22px;
+      font-weight: 300;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .add-btn:hover  { background: #ffe55a; transform: scale(1.06); }
+    .add-btn:active { transform: scale(0.94); }
+
+    /* LIST AREA */
+    .list-area {
+      padding: 12px 16px;
+      min-height: 130px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .empty-hint {
+      color: #2e2e3a;
+      font-size: 13px;
+      text-align: center;
+      margin: auto;
+      font-style: italic;
+    }
+    .tag {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a1a22;
+      border: 1px solid #252530;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      animation: slideIn 0.18s ease;
+    }
+    .tag-mono { font-family: 'DM Mono', monospace; font-size: 13px; }
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #3a3a4a;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding-left: 10px;
+      transition: color 0.15s;
+    }
+    .remove-btn:hover { color: #FF6B6B; }
+
+    /* ACTION AREA */
+    .action-area {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .warn {
+      font-size: 12px;
+      color: #FF922B;
+      background: rgba(255,146,43,0.08);
+      border: 1px solid rgba(255,146,43,0.18);
+      border-radius: 8px;
+      padding: 8px 18px;
+      display: none;
+    }
+    .assign-btn {
+      background: linear-gradient(135deg, #FFD93D, #FF922B);
+      color: #0f0f13;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 52px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      letter-spacing: -0.2px;
+      box-shadow: 0 4px 24px rgba(255,217,61,0.18);
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+    }
+    .assign-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,217,61,0.28); }
+    .assign-btn:active:not(:disabled) { transform: translateY(0); }
+    .assign-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .btn-row { display: flex; gap: 10px; }
+    .shuffle-btn {
+      background: #1e1e28;
+      color: #bbb;
+      border: 1px solid #2a2a38;
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .shuffle-btn:hover { background: #252530; border-color: #444; }
+    .reset-btn {
+      background: transparent;
+      color: #555;
+      border: 1px solid #252530;
+      border-radius: 10px;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .reset-btn:hover { color: #FF6B6B; border-color: rgba(255,107,107,0.3); }
+
+    /* RESULTS */
+    .results-area {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 40px 48px;
+    }
+    .results-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #444;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+    }
+    .result-card {
+      background: #141418;
+      border: 1px solid #252530;
+      border-radius: 12px;
+      border-top-width: 2px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: popIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      transition: transform 0.15s, border-color 0.15s;
+      cursor: default;
+    }
+    .result-card:hover { transform: translateY(-2px); border-color: #333; }
+    .result-desk {
+      font-family: 'DM Mono', monospace;
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1;
+    }
+    .result-label { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px; }
+    .result-divider { height: 1px; background: #1e1e28; }
+    .result-name { font-size: 14px; color: #ccc; font-weight: 500; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-8px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.86); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icon">🏢</div>
+    <div>
+      <h1>Desk Assignment</h1>
+      <p>Randomly pair employees with desk numbers</p>
+    </div>
+  </div>
+
+  <!-- PANELS -->
+  <div class="main">
+    <!-- Names -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:#6BCB77"></div>
+        <span class="panel-title">Employees</span>
+        <span class="panel-count" id="name-count">0</span>
+      </div>
+      <div class="input-row">
+        <input id="name-input" type="text" placeholder="Enter employee name…" />
+        <button class="add-btn" onclick="addName()">+</button>
+      </div>
+      <div class="list-area" id="name-list">
+        <span class="empty-hint">No employees added yet</span>
+      </div>
+    </div>
+
+    <!-- Desks -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-dot" style="background:#4D96FF"></div>
+        <span class="panel-title">Desk Numbers</span>
+        <span class="panel-count" id="desk-count">0</span>
+      </div>
+      <div class="input-row">
+        <input id="desk-input" type="text" placeholder="Enter desk number…" />
+        <button class="add-btn" onclick="addDesk()">+</button>
+      </div>
+      <div class="list-area" id="desk-list">
+        <span class="empty-hint">No desks added yet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION -->
+  <div class="action-area">
+    <div class="warn" id="warn-msg"></div>
+    <button class="assign-btn" id="assign-btn" onclick="assign()" disabled>🎲 Assign Desks Randomly</button>
+    <div class="btn-row" id="btn-row" style="display:none">
+      <button class="shuffle-btn" onclick="assign()">🔀 Reshuffle</button>
+      <button class="reset-btn"   onclick="resetAll()">✕ Reset All</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-area" id="results-area" style="display:none">
+    <div class="results-title" id="results-title"></div>
+    <div class="results-grid" id="results-grid"></div>
+  </div>
+
+  <script>
+    const COLORS = [
+      "#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF922B",
+      "#CC5DE8","#20C997","#F06595","#74C0FC","#A9E34B",
+    ];
+
+    let names = [];
+    let desks = [];
+    let assigned = false;
+
+    /* ── INPUT ENTER KEY ── */
+    document.getElementById('name-input').addEventListener('keydown', e => { if (e.key === 'Enter') addName(); });
+    document.getElementById('desk-input').addEventListener('keydown', e => { if (e.key === 'Enter') addDesk(); });
+
+    /* ── ADD ── */
+    function addName() {
+      const inp = document.getElementById('name-input');
+      const val = inp.value.trim();
+      if (!val || names.includes(val)) return;
+      names.push(val);
+      inp.value = '';
+      renderNames();
+      updateUI();
+    }
+
+    function addDesk() {
+      const inp = document.getElementById('desk-input');
+      const val = inp.value.trim();
+      if (!val || desks.includes(val)) return;
+      desks.push(val);
+      inp.value = '';
+      renderDesks();
+      updateUI();
+    }
+
+    /* ── REMOVE ── */
+    function removeName(n) {
+      names = names.filter(x => x !== n);
+      renderNames();
+      assigned = false;
+      updateUI();
+    }
+
+    function removeDesk(d) {
+      desks = desks.filter(x => x !== d);
+      renderDesks();
+      assigned = false;
+      updateUI();
+    }
+
+    /* ── RENDER LISTS ── */
+    function renderNames() {
+      const el = document.getElementById('name-list');
+      document.getElementById('name-count').textContent = names.length;
+      if (names.length === 0) {
+        el.innerHTML = '<span class="empty-hint">No employees added yet</span>';
+        return;
+      }
+      el.innerHTML = names.map(n => `
+        <div class="tag">
+          <span>${escHtml(n)}</span>
+          <button class="remove-btn" onclick="removeName(${JSON.stringify(n)})">×</button>
+        </div>`).join('');
+    }
+
+    function renderDesks() {
+      const el = document.getElementById('desk-list');
+      document.getElementById('desk-count').textContent = desks.length;
+      if (desks.length === 0) {
+        el.innerHTML = '<span class="empty-hint">No desks added yet</span>';
+        return;
+      }
+      el.innerHTML = desks.map(d => `
+        <div class="tag">
+          <span class="tag-mono">#${escHtml(d)}</span>
+          <button class="remove-btn" onclick="removeDesk(${JSON.stringify(d)})">×</button>
+        </div>`).join('');
+    }
+
+    /* ── ASSIGN ── */
+    function assign() {
+      if (names.length === 0 || desks.length === 0) return;
+
+      const shuffled = shuffle([...desks]);
+      const pairs = names.map((name, i) => ({
+        name,
+        desk: shuffled[i % shuffled.length],
+        color: COLORS[i % COLORS.length],
+      }));
+
+      assigned = true;
+      renderResults(pairs);
+      updateUI();
+    }
+
+    function renderResults(pairs) {
+      const grid = document.getElementById('results-grid');
+      document.getElementById('results-title').textContent =
+        `Assignment Results — ${pairs.length} pair${pairs.length !== 1 ? 's' : ''}`;
+
+      grid.innerHTML = pairs.map((p, i) => `
+        <div class="result-card" style="border-top-color:${p.color}; animation-delay:${i * 0.05}s">
+          <div>
+            <div class="result-desk" style="color:${p.color}">#${escHtml(p.desk)}</div>
+            <div class="result-label">Desk</div>
+          </div>
+          <div class="result-divider"></div>
+          <div class="result-name">${escHtml(p.name)}</div>
+        </div>`).join('');
+
+      document.getElementById('results-area').style.display = 'block';
+    }
+
+    /* ── RESET ── */
+    function resetAll() {
+      names = []; desks = []; assigned = false;
+      renderNames(); renderDesks();
+      document.getElementById('results-area').style.display = 'none';
+      updateUI();
+    }
+
+    /* ── UI STATE ── */
+    function updateUI() {
+      const canAssign = names.length > 0 && desks.length > 0;
+      const mismatch  = canAssign && names.length !== desks.length;
+
+      document.getElementById('assign-btn').disabled = !canAssign;
+
+      const warn = document.getElementById('warn-msg');
+      if (mismatch) {
+        warn.style.display = 'block';
+        warn.textContent = `⚠️ ${names.length} employees · ${desks.length} desks — desk numbers will be reused or some won't be assigned`;
+      } else {
+        warn.style.display = 'none';
+      }
+
+      document.getElementById('assign-btn').style.display = assigned ? 'none' : '';
+      document.getElementById('btn-row').style.display  = assigned ? 'flex'  : 'none';
+    }
+
+    /* ── HELPERS ── */
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
